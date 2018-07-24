@@ -14,10 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.foilen.infra.plugin.v1.core.context.ChangesContext;
 import com.foilen.infra.plugin.v1.core.context.CommonServicesContext;
-import com.foilen.infra.plugin.v1.core.eventhandler.AbstractCommonMethodUpdateEventHandler;
-import com.foilen.infra.plugin.v1.core.eventhandler.CommonMethodUpdateEventHandlerContext;
+import com.foilen.infra.plugin.v1.core.eventhandler.AbstractFinalStateManagedResourcesEventHandler;
+import com.foilen.infra.plugin.v1.core.eventhandler.FinalStateManagedResource;
+import com.foilen.infra.plugin.v1.core.eventhandler.FinalStateManagedResourcesUpdateEventHandlerContext;
 import com.foilen.infra.plugin.v1.core.exception.ProblemException;
 import com.foilen.infra.plugin.v1.model.base.IPApplicationDefinition;
 import com.foilen.infra.plugin.v1.model.base.IPApplicationDefinitionAssetsBundle;
@@ -36,12 +36,11 @@ import com.foilen.smalltools.tools.JsonTools;
 import com.foilen.smalltools.tools.SecureRandomTools;
 import com.google.common.base.Strings;
 
-public class MariaDBServerUpdateHandler extends AbstractCommonMethodUpdateEventHandler<MariaDBServer> {
+public class MariaDBServerUpdateHandler extends AbstractFinalStateManagedResourcesEventHandler<MariaDBServer> {
 
     @Override
-    protected void commonHandlerExecute(CommonServicesContext services, ChangesContext changes, CommonMethodUpdateEventHandlerContext<MariaDBServer> context) {
+    protected void commonHandlerExecute(CommonServicesContext services, FinalStateManagedResourcesUpdateEventHandlerContext<MariaDBServer> context) {
 
-        context.setManagedResourcesUpdateContentIfExists(true);
         context.getManagedResourceTypes().add(Application.class);
 
         MariaDBServer mariaDBServer = context.getResource();
@@ -52,7 +51,7 @@ public class MariaDBServerUpdateHandler extends AbstractCommonMethodUpdateEventH
         // Create a root password if none is set
         if (Strings.isNullOrEmpty(mariaDBServer.getRootPassword())) {
             mariaDBServer.setRootPassword(SecureRandomTools.randomHexString(25));
-            changes.resourceUpdate(mariaDBServer.getInternalId(), mariaDBServer);
+            context.setRequestUpdateResource(true);
         }
 
         // Get the user and machines
@@ -158,16 +157,20 @@ public class MariaDBServerUpdateHandler extends AbstractCommonMethodUpdateEventH
             applicationDefinition.addExecuteWhenStartedCommand("/mariadb-update-manager.sh");
 
             // Manage the app
-            context.getManagedResources().add(application);
+            FinalStateManagedResource finalStateManagedApplication = new FinalStateManagedResource();
+            finalStateManagedApplication.setManagedResource(application);
+            context.getManagedResources().add(finalStateManagedApplication);
 
             // add Machine INSTALLED_ON to mysqlApplicationDefinition (only 0 or 1)
+            finalStateManagedApplication.addManagedLinksToType(LinkTypeConstants.INSTALLED_ON);
             if (machines.size() == 1) {
                 Machine machine = machines.get(0);
-                changes.linkAdd(application, LinkTypeConstants.INSTALLED_ON, machine);
+                finalStateManagedApplication.addLinkTo(LinkTypeConstants.INSTALLED_ON, machine);
             }
 
             // add UnixUser RUN_AS to mysqlApplicationDefinition (only 1)
-            changes.linkAdd(application, LinkTypeConstants.RUN_AS, unixUser);
+            finalStateManagedApplication.addManagedLinksToType(LinkTypeConstants.RUN_AS);
+            finalStateManagedApplication.addLinkTo(LinkTypeConstants.RUN_AS, unixUser);
         }
     }
 
