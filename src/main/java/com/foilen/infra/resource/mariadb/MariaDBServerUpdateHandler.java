@@ -129,7 +129,7 @@ public class MariaDBServerUpdateHandler extends AbstractFinalStateManagedResourc
 
             IPApplicationDefinition applicationDefinition = application.getApplicationDefinition();
 
-            applicationDefinition.setFrom("foilen/fcloud-docker-mariadb:10.3.5-1.1.0-001");
+            applicationDefinition.setFrom("foilen/fcloud-docker-mariadb:10.3.5-1.1.1-001");
 
             applicationDefinition.addService("app", "/mariadb-start.sh");
             IPApplicationDefinitionAssetsBundle assetsBundle = applicationDefinition.addAssetsBundle();
