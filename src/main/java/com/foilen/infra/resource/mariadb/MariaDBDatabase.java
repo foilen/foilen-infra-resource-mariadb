@@ -22,6 +22,8 @@ import com.google.common.collect.ComparisonChain;
  */
 public class MariaDBDatabase extends AbstractIPResource implements Comparable<MariaDBDatabase> {
 
+    public static final String RESOURCE_TYPE = "MariaDB Database";
+
     public static final String PROPERTY_NAME = "name";
     public static final String PROPERTY_DESCRIPTION = "description";
 

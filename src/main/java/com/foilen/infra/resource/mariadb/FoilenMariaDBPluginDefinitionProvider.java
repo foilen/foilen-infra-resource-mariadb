@@ -21,21 +21,21 @@ public class FoilenMariaDBPluginDefinitionProvider implements IPPluginDefinition
     public IPPluginDefinitionV1 getIPPluginDefinition() {
         IPPluginDefinitionV1 pluginDefinitionV1 = new IPPluginDefinitionV1("Foilen", "MariaDB", "To manage MariaDB databases", "1.0.0");
 
-        pluginDefinitionV1.addCustomResource(MariaDBServer.class, "MariaDB Server", //
+        pluginDefinitionV1.addCustomResource(MariaDBServer.class, MariaDBServer.RESOURCE_TYPE, //
                 Arrays.asList(MariaDBServer.PROPERTY_NAME), //
                 Arrays.asList( //
                         MariaDBServer.PROPERTY_NAME, //
                         MariaDBServer.PROPERTY_DESCRIPTION //
                 ));
 
-        pluginDefinitionV1.addCustomResource(MariaDBDatabase.class, "MariaDB Database", //
+        pluginDefinitionV1.addCustomResource(MariaDBDatabase.class, MariaDBDatabase.RESOURCE_TYPE, //
                 Arrays.asList(MariaDBDatabase.PROPERTY_NAME), //
                 Arrays.asList( //
                         MariaDBDatabase.PROPERTY_NAME, //
                         MariaDBDatabase.PROPERTY_DESCRIPTION //
                 ));
 
-        pluginDefinitionV1.addCustomResource(MariaDBUser.class, "MariaDB User", //
+        pluginDefinitionV1.addCustomResource(MariaDBUser.class, MariaDBUser.RESOURCE_TYPE, //
                 Arrays.asList(MariaDBUser.PROPERTY_NAME), //
                 Arrays.asList( //
                         MariaDBUser.PROPERTY_NAME, //

@@ -28,6 +28,8 @@ import com.google.common.collect.ComparisonChain;
  */
 public class MariaDBServer extends AbstractIPResource implements Comparable<MariaDBServer> {
 
+    public static final String RESOURCE_TYPE = "MariaDB Server";
+
     public static final String PROPERTY_NAME = "name";
     public static final String PROPERTY_DESCRIPTION = "description";
     public static final String PROPERTY_ROOT_PASSWORD = "rootPassword";

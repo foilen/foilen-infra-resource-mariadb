@@ -24,6 +24,8 @@ import com.google.common.collect.ComparisonChain;
  */
 public class MariaDBUser extends AbstractIPResource implements Comparable<MariaDBUser> {
 
+    public static final String RESOURCE_TYPE = "MariaDB User";
+
     public static final String LINK_TYPE_ADMIN = "CAN_ADMIN";
     public static final String LINK_TYPE_READ = "CAN_READ";
     public static final String LINK_TYPE_WRITE = "CAN_WRITE";
