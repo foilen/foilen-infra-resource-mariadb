@@ -1,0 +1,90 @@
+/*
+    Foilen Infra Resource MariaDB
+    https://github.com/foilen/foilen-infra-resource-mariadb
+    Copyright (c) 2018 Foilen (http://foilen.com)
+
+    The MIT License
+    http://opensource.org/licenses/MIT
+
+ */
+package com.foilen.infra.resource.mariadb;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.Test;
+
+import com.foilen.infra.plugin.core.system.fake.junits.AbstractIPPluginTest;
+import com.foilen.infra.plugin.core.system.junits.JunitsHelper;
+import com.foilen.infra.plugin.v1.core.context.ChangesContext;
+import com.foilen.infra.plugin.v1.core.service.IPResourceService;
+import com.foilen.infra.plugin.v1.core.service.internal.InternalChangeService;
+import com.foilen.infra.plugin.v1.model.resource.IPResource;
+import com.foilen.infra.resource.machine.Machine;
+import com.foilen.infra.resource.unixuser.UnixUser;
+
+public class MariadbEditorTest extends AbstractIPPluginTest {
+
+    private Machine findMachineByName(String name) {
+        IPResourceService resourceService = getCommonServicesContext().getResourceService();
+        return resourceService.resourceFind(resourceService.createResourceQuery(Machine.class) //
+                .propertyEquals(Machine.PROPERTY_NAME, name)) //
+                .get();
+    }
+
+    private <R extends IPResource> R findSingle(Class<R> resourceType) {
+        IPResourceService resourceService = getCommonServicesContext().getResourceService();
+        return resourceService.resourceFind(resourceService.createResourceQuery(resourceType)).get();
+    }
+
+    private UnixUser findUnixUserByName(String name) {
+        IPResourceService resourceService = getCommonServicesContext().getResourceService();
+        return resourceService.resourceFind(resourceService.createResourceQuery(UnixUser.class) //
+                .propertyEquals(UnixUser.PROPERTY_NAME, name)) //
+                .get();
+    }
+
+    @Test
+    public void test() {
+
+        // Create fake data
+        IPResourceService resourceService = getCommonServicesContext().getResourceService();
+        InternalChangeService internalChangeService = getInternalServicesContext().getInternalChangeService();
+
+        ChangesContext changes = new ChangesContext(resourceService);
+        changes.resourceAdd(new Machine("test1.node.example.com", "192.168.0.11"));
+        changes.resourceAdd(new UnixUser(null, "user1", "/home/user1", null, null));
+        internalChangeService.changesExecute(changes);
+        String machineId = String.valueOf(findMachineByName("test1.node.example.com").getInternalId());
+        String unixUserId = String.valueOf(findUnixUserByName("user1").getInternalId());
+
+        // MariaDBServerEditor
+        Map<String, String> mariaDBServerEditorForm = new HashMap<>();
+        mariaDBServerEditorForm.put(MariaDBServer.PROPERTY_NAME, "user_db");
+        mariaDBServerEditorForm.put(MariaDBServer.PROPERTY_ROOT_PASSWORD, "abc");
+        mariaDBServerEditorForm.put("unixUser", unixUserId);
+        mariaDBServerEditorForm.put("machine", machineId);
+        assertEditorNoErrors(null, new MariaDBServerEditor(), mariaDBServerEditorForm);
+        String mariaDbServerId = String.valueOf(findSingle(MariaDBServer.class).getInternalId());
+
+        // MariaDBDatabaseEditor
+        Map<String, String> mariaDBDatabaseEditorForm = new HashMap<>();
+        mariaDBDatabaseEditorForm.put(MariaDBDatabase.PROPERTY_NAME, "wordpress");
+        mariaDBDatabaseEditorForm.put("mariadbServers", mariaDbServerId);
+        assertEditorNoErrors(null, new MariaDBDatabaseEditor(), mariaDBDatabaseEditorForm);
+        String mariaDbDatabaseId = String.valueOf(findSingle(MariaDBDatabase.class).getInternalId());
+
+        // MariaDBUserEditor
+        Map<String, String> mariaDBUserEditorForm = new HashMap<>();
+        mariaDBUserEditorForm.put(MariaDBUser.PROPERTY_NAME, "wp_user");
+        mariaDBUserEditorForm.put(MariaDBUser.PROPERTY_PASSWORD, "123");
+        mariaDBUserEditorForm.put("admin", mariaDbDatabaseId);
+        mariaDBUserEditorForm.put("read", mariaDbDatabaseId);
+        mariaDBUserEditorForm.put("write", mariaDbDatabaseId);
+        assertEditorNoErrors(null, new MariaDBUserEditor(), mariaDBUserEditorForm);
+
+        // Assert
+        JunitsHelper.assertState(getCommonServicesContext(), getInternalServicesContext(), "MariadbEditorTest-test-state.json", getClass(), true);
+    }
+
+}
