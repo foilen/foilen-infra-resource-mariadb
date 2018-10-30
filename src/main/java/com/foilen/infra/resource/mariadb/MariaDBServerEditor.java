@@ -40,6 +40,8 @@ public class MariaDBServerEditor extends SimpleResourceEditor<MariaDBServer> {
         simpleResourceEditorDefinition.addResource("unixUser", LinkTypeConstants.RUN_AS, UnixUser.class);
         simpleResourceEditorDefinition.addResource("machine", LinkTypeConstants.INSTALLED_ON, Machine.class);
 
+        simpleResourceEditorDefinition.addReverseResources("databases", MariaDBDatabase.class, LinkTypeConstants.INSTALLED_ON);
+
     }
 
     @Override
