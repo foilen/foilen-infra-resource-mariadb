@@ -11,7 +11,7 @@
     "tags" : [ ],
     "content" : {
       "applicationDefinition" : {
-        "_nextAssetId" : 2,
+        "_nextAssetId" : 3,
         "assetsBundles" : [ {
           "assetsFolderPath" : "_assets_1/",
           "assetsRelativePathAndBinaryContent" : [ ],
@@ -24,9 +24,17 @@
 password=abc"
           } ]
         } ],
-        "assetsPathAndContent" : [ ],
+        "assetsPathAndContent" : [ {
+          "a" : "_assets/2",
+          "b" : "[mysqld]
+max_allowed_packet	= 500M
+"
+        } ],
         "buildSteps" : [ {
           "step" : "_assets_1/ /",
+          "type" : "COPY"
+        }, {
+          "step" : "_assets/2 /etc/mysql/conf.d/zInfra.cnf",
           "type" : "COPY"
         } ],
         "containerUsersToChangeId" : [ {

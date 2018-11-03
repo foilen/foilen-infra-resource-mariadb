@@ -139,6 +139,9 @@ public class MariaDBServerUpdateHandler extends AbstractFinalStateManagedResourc
 
             applicationDefinition.setRunAs(unixUser.getId());
 
+            // Configuration
+            applicationDefinition.addAssetResource("/etc/mysql/conf.d/zInfra.cnf", "/com/foilen/infra/resource/mariadb/config.cnf");
+
             // Data folder
             String baseFolder = unixUser.getHomeFolder() + "/mysql/" + serverName;
             applicationDefinition.addVolume(new IPApplicationDefinitionVolume(baseFolder + "/data", "/var/lib/mysql", unixUser.getId(), unixUser.getId(), "770"));
